@@ -55,4 +55,42 @@ def select_record(
         result.append(record)
     return result
 
-    
+def update_record(
+    student_id: int,
+    first_name: str | None = None,
+    second_name: str | None = None,
+    age: int | None = None,
+    sex: str | None = None,
+) -> StudentRecord:
+    for i, record in enumerate(Student):
+        if record[0] != student_id:
+            continue
+
+        new_first_name = record[1] if first_name is None else first_name.strip()
+        new_second_name = record[2] if second_name is None else second_name.strip()
+        new_age = record[3] if age is None else age
+        new_sex = record[4] if sex is None else sex.strip()
+
+        if new_age < 0:
+            raise ValueError("Возраст не может быть отрицательным.")
+
+        updated_record: StudentRecord = (
+            record[0],
+            new_first_name,
+            new_second_name,
+            new_age,
+            new_sex,
+        )
+        Student[i] = updated_record
+        return updated_record
+
+    raise ValueError("Запись с таким id не найдена.")
+
+
+def delete_record(student_id: int) -> StudentRecord:
+    for i, record in enumerate(Student):
+        if record[0] == student_id:
+            deleted_record = Student.pop(i)
+            return deleted_record
+
+    raise ValueError("Запись с таким id не найдена.")
