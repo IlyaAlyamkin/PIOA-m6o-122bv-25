@@ -1,4 +1,9 @@
-from backend.memory import create_record, delete_record, select_record, update_record
+try:
+    from .backend.memory import create_record, delete_record, select_record, update_record
+except ImportError:
+    from backend.memory import create_record, delete_record, select_record, update_record
+
+
 def _print_menu() -> None:
     # Символ \n обозначает перевод строки.
     print("\n=== База студентов ===")
@@ -9,6 +14,7 @@ def _print_menu() -> None:
     print("5. Удалить запись")
     print("0. Выход")
 
+
 def _read_int(prompt: str) -> int:
     while True:
         raw = input(prompt).strip()
@@ -16,6 +22,7 @@ def _read_int(prompt: str) -> int:
             return int(raw)
         except ValueError:
             print("Ошибка: введите целое число.")
+
 
 def _add_student() -> None:
     print("\nДобавление записи")
@@ -33,6 +40,7 @@ def _add_student() -> None:
     except ValueError as exc:
         print(f"Ошибка: {exc}")
 
+
 def _print_records(records: list[tuple[int, str, str, int, str]]) -> None:
     if not records:
         print("Записи не найдены.")
@@ -40,9 +48,13 @@ def _print_records(records: list[tuple[int, str, str, int, str]]) -> None:
 
     for record in records:
         print(record)
+
+
 def _show_all_students() -> None:
     print("\nСписок записей")
     _print_records(select_record())
+
+
 def _read_optional_int(prompt: str) -> int | None:
     while True:
         raw = input(prompt).strip()
@@ -54,6 +66,8 @@ def _read_optional_int(prompt: str) -> int | None:
             return int(raw)
         except ValueError:
             print("Ошибка: введите целое число или оставьте поле пустым.")
+
+
 def _find_students_by_filter() -> None:
     print("\nПоиск по фильтру (Enter = пропустить поле)")
 
@@ -143,6 +157,3 @@ def run() -> None:
 
         else:
             print("Неизвестная команда. Повторите ввод.")
-
-
-

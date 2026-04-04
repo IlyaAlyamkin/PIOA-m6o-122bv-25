@@ -1,16 +1,18 @@
 type StudentRecord = tuple[int, str, str, int, str]
 Student: list[StudentRecord] = []
+
+
 def create_record(
-    student_id: int,   
-    first_name: str,   
-    second_name: str,  
-    age: int,          
-    sex: str,          
+    student_id: int,
+    first_name: str,
+    second_name: str,
+    age: int,
+    sex: str,
 ) -> StudentRecord:
     if age < 0:
-        raise ValueError
+        raise ValueError("Возраст не может быть отрицательным.")
     if any(record[0] == student_id for record in Student):
-        raise ValueError
+        raise ValueError("Запись с таким id уже существует.")
     new_record: StudentRecord = (
         student_id,
         first_name.strip(),
@@ -21,12 +23,13 @@ def create_record(
     Student.append(new_record)
     return new_record
 
+
 def select_record(
-    student_id: int | None = None,   
-    first_name: str | None = None,   
-    second_name: str | None = None,  
-    age: int | None = None,          
-    sex: str | None = None,          
+    student_id: int | None = None,
+    first_name: str | None = None,
+    second_name: str | None = None,
+    age: int | None = None,
+    sex: str | None = None,
 ) -> list[StudentRecord]:
     if (
         student_id is None
@@ -54,6 +57,7 @@ def select_record(
             continue
         result.append(record)
     return result
+
 
 def update_record(
     student_id: int,
