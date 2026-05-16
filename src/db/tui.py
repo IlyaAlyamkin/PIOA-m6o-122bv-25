@@ -1,11 +1,30 @@
 try:
-    from .backend.memory import create_record, delete_record, select_record, update_record
-except ImportError:
-    from backend.memory import create_record, delete_record, select_record, update_record
+    from .backend.errors import DatabaseError
+    from .backend.file import FileDatabase
+    from .backend.memory import MemoryDatabase
+    from .backend.students import StudentRepository
+except ImportError:  # pragma: no cover
+    from backend.errors import DatabaseError
+    from backend.file import FileDatabase
+    from backend.memory import MemoryDatabase
+    from backend.students import StudentRepository
+
+
+def _choose_repository() -> StudentRepository:
+    print("Выберите тип базы данных:")
+    print("1. In-memory")
+    print("2. File database")
+
+    choice = input("Введите номер: ").strip()
+    if choice == "2":
+        database = FileDatabase()
+    else:
+        database = MemoryDatabase()
+
+    return StudentRepository(database)
 
 
 def _print_menu() -> None:
-    # Символ \n обозначает перевод строки.
     print("\n=== База студентов ===")
     print("1. Добавить запись")
     print("2. Показать все записи")
@@ -24,37 +43,6 @@ def _read_int(prompt: str) -> int:
             print("Ошибка: введите целое число.")
 
 
-def _add_student() -> None:
-    print("\nДобавление записи")
-
-    student_id = _read_int("id: ")
-    first_name = input("first_name: ").strip()
-    second_name = input("second_name: ").strip()
-    age = _read_int("age: ")
-    sex = input("sex: ").strip()
-
-    try:
-        record = create_record(student_id, first_name, second_name, age, sex)
-        print(f"Запись добавлена: {record}")
-
-    except ValueError as exc:
-        print(f"Ошибка: {exc}")
-
-
-def _print_records(records: list[tuple[int, str, str, int, str]]) -> None:
-    if not records:
-        print("Записи не найдены.")
-        return
-
-    for record in records:
-        print(record)
-
-
-def _show_all_students() -> None:
-    print("\nСписок записей")
-    _print_records(select_record())
-
-
 def _read_optional_int(prompt: str) -> int | None:
     while True:
         raw = input(prompt).strip()
@@ -68,29 +56,63 @@ def _read_optional_int(prompt: str) -> int | None:
             print("Ошибка: введите целое число или оставьте поле пустым.")
 
 
-def _find_students_by_filter() -> None:
+def _print_records(records: list[dict]) -> None:
+    if not records:
+        print("Записи не найдены.")
+        return
+
+    for record in records:
+        print(record)
+
+
+def _add_student(repository: StudentRepository) -> None:
+    print("\nДобавление записи")
+
+    student_id = _read_int("id: ")
+    first_name = input("first_name: ").strip()
+    second_name = input("second_name: ").strip()
+    age = _read_int("age: ")
+    sex = input("sex: ").strip()
+
+    try:
+        record = repository.create_record(
+            student_id,
+            first_name,
+            second_name,
+            age,
+            sex,
+        )
+        print(f"Запись добавлена: {record}")
+
+    except DatabaseError as exc:
+        print(f"Ошибка: {exc}")
+
+
+def _show_all_students(repository: StudentRepository) -> None:
+    print("\nСписок записей")
+    _print_records(repository.select_record())
+
+
+def _find_students_by_filter(repository: StudentRepository) -> None:
     print("\nПоиск по фильтру (Enter = пропустить поле)")
 
     student_id = _read_optional_int("id: ")
-
     first_name = input("first_name: ").strip() or None
     second_name = input("second_name: ").strip() or None
-
     age = _read_optional_int("age: ")
     sex = input("sex: ").strip() or None
 
-    records = select_record(
+    records = repository.select_record(
         student_id=student_id,
         first_name=first_name,
         second_name=second_name,
         age=age,
         sex=sex,
     )
-
     _print_records(records)
 
 
-def _update_student() -> None:
+def _update_student(repository: StudentRepository) -> None:
     print("\nОбновление записи (Enter = оставить старое значение)")
     student_id = _read_int("id записи для изменения: ")
 
@@ -104,7 +126,7 @@ def _update_student() -> None:
     sex = None if sex_raw == "" else sex_raw
 
     try:
-        updated = update_record(
+        updated = repository.update_record(
             student_id=student_id,
             first_name=first_name,
             second_name=second_name,
@@ -112,44 +134,41 @@ def _update_student() -> None:
             sex=sex,
         )
         print(f"Запись обновлена: {updated}")
-    except ValueError as exc:
+    except DatabaseError as exc:
         print(f"Ошибка: {exc}")
 
 
-def _delete_student() -> None:
+def _delete_student(repository: StudentRepository) -> None:
     print("\nУдаление записи")
     student_id = _read_int("id записи для удаления: ")
     try:
-        deleted = delete_record(student_id)
+        deleted = repository.delete_record(student_id)
         print(f"Запись удалена: {deleted}")
-    except ValueError as exc:
+    except DatabaseError as exc:
         print(f"Ошибка: {exc}")
 
 
 def run() -> None:
-    """
-    Запускает основной цикл текстового пользовательского интерфейса.
+    """Запускает основной цикл текстового пользовательского интерфейса."""
+    repository = _choose_repository()
 
-    Цикл выполняется до тех пор, пока пользователь явно
-    не выберет завершение программы.
-    """
     while True:
         _print_menu()
         action = input("Выберите действие: ").strip()
         if action == "1":
-            _add_student()
+            _add_student(repository)
 
         elif action == "2":
-            _show_all_students()
+            _show_all_students(repository)
 
         elif action == "3":
-            _find_students_by_filter()
+            _find_students_by_filter(repository)
 
         elif action == "4":
-            _update_student()
+            _update_student(repository)
 
         elif action == "5":
-            _delete_student()
+            _delete_student(repository)
 
         elif action == "0":
             print("Выход из программы.")
