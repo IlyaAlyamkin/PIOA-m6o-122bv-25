@@ -1,0 +1,18 @@
+{
+  "columns": [
+    "student_id",
+    "first_name",
+    "second_name",
+    "age",
+    "sex"
+  ],
+  "records": [
+    {
+      "student_id": 3,
+      "first_name": "Bob",
+      "second_name": "Brown",
+      "age": 19,
+      "sex": "M"
+    }
+  ]
+}
