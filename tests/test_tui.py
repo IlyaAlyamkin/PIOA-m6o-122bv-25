@@ -36,6 +36,21 @@ class TestTui(unittest.TestCase):
             with patch("builtins.print"):
                 tui.run()
 
+    def test_run_csv_file_database_flow(self) -> None:
+        user_input = [
+            "3",
+            "1",
+            "4",
+            "Ann",
+            "Lee",
+            "21",
+            "F",
+            "0",
+        ]
+        with patch("builtins.input", side_effect=user_input):
+            with patch("builtins.print"):
+                tui.run()
+
     def test_run_unknown_command(self) -> None:
         user_input = ["1", "bad", "0"]
         with patch("builtins.input", side_effect=user_input):

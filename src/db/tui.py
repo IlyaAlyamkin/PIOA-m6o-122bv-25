@@ -1,9 +1,11 @@
 try:
+    from .backend.csv_file import CsvFileDatabase
     from .backend.errors import DatabaseError
     from .backend.file import FileDatabase
     from .backend.memory import MemoryDatabase
     from .backend.students import StudentRepository
 except ImportError:  # pragma: no cover
+    from backend.csv_file import CsvFileDatabase
     from backend.errors import DatabaseError
     from backend.file import FileDatabase
     from backend.memory import MemoryDatabase
@@ -13,11 +15,14 @@ except ImportError:  # pragma: no cover
 def _choose_repository() -> StudentRepository:
     print("Выберите тип базы данных:")
     print("1. In-memory")
-    print("2. File database")
+    print("2. File database (JSON)")
+    print("3. File database (CSV)")
 
     choice = input("Введите номер: ").strip()
     if choice == "2":
         database = FileDatabase()
+    elif choice == "3":
+        database = CsvFileDatabase()
     else:
         database = MemoryDatabase()
 
