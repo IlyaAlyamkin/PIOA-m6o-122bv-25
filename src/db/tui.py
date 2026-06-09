@@ -1,7 +1,7 @@
 try:
     from .backend.errors import StudentTableError
     from .backend.memory import StudentTable
-except ImportError:  # pragma: no cover
+except ImportError:  
     from backend.errors import StudentTableError
     from backend.memory import StudentTable
 
@@ -33,6 +33,9 @@ class TUI:
             elif action == "5":
                 self._delete_student()
 
+            elif action == "6":
+                self._sort_students()
+
             elif action == "0":
                 print("Выход из программы.")
                 break
@@ -47,6 +50,7 @@ class TUI:
         print("3. Найти записи по фильтру")
         print("4. Обновить запись")
         print("5. Удалить запись")
+        print("6. Сортировать записи")
         print("0. Выход")
 
     def _read_int(self, prompt: str) -> int:
@@ -143,6 +147,47 @@ class TUI:
                 sex=sex,
             )
             print(f"Запись обновлена: {updated}")
+        except StudentTableError as exc:
+            print(f"Ошибка: {exc}")
+
+    def _sort_students(self) -> None:
+        print("\nСортировка записей")
+        print("1. id")
+        print("2. first_name")
+        print("3. second_name")
+        print("4. age")
+        print("5. sex")
+
+        field_map = {
+            "1": "id",
+            "2": "first_name",
+            "3": "second_name",
+            "4": "age",
+            "5": "sex",
+        }
+
+        field_choice = input("Выберите поле: ").strip()
+        field = field_map.get(field_choice)
+
+        if field is None:
+            print("Ошибка: неверный выбор поля.")
+            return
+
+        print("1. По возрастанию")
+        print("2. По убыванию")
+        order_choice = input("Выберите порядок: ").strip()
+
+        if order_choice == "1":
+            descending = False
+        elif order_choice == "2":
+            descending = True
+        else:
+            print("Ошибка: неверный выбор порядка.")
+            return
+
+        try:
+            records = self.table.sort_records(field, descending=descending)
+            self._print_records(records)
         except StudentTableError as exc:
             print(f"Ошибка: {exc}")
 

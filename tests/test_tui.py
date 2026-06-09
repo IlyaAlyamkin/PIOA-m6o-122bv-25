@@ -124,3 +124,41 @@ class TestTui(unittest.TestCase):
         with patch("builtins.input", side_effect=user_input):
             with patch("builtins.print"):
                 run()
+
+    def test_run_sort_students_asc(self) -> None:
+        user_input = [
+            "1",
+            "2",
+            "Bob",
+            "Brown",
+            "21",
+            "M",
+            "1",
+            "1",
+            "Ann",
+            "Lee",
+            "19",
+            "F",
+            "6",
+            "4",
+            "1",
+            "0",
+        ]
+
+        with patch("builtins.input", side_effect=user_input):
+            with patch("builtins.print"):
+                TUI(StudentTable()).run()
+
+    def test_run_sort_students_invalid_field(self) -> None:
+        user_input = ["6", "9", "0"]
+
+        with patch("builtins.input", side_effect=user_input):
+            with patch("builtins.print"):
+                TUI(StudentTable()).run()
+
+    def test_run_sort_students_invalid_order(self) -> None:
+        user_input = ["6", "1", "9", "0"]
+
+        with patch("builtins.input", side_effect=user_input):
+            with patch("builtins.print"):
+                TUI(StudentTable()).run()

@@ -3,6 +3,7 @@ import unittest
 from src.db.backend.errors import (
     DuplicateIDError,
     InvalidAgeError,
+    InvalidFieldError,
     RecordNotFoundError,
 )
 from src.db.backend.memory import StudentTable
@@ -203,3 +204,54 @@ class TestMemory(unittest.TestCase):
         deleted = self.student_table.delete_record(2)
         self.assertEqual(deleted, (2, "B", "B", 21, "F"))
         self.assertEqual(len(self.student_table.select_record()), 1)
+
+    def test_sort_records_by_id_asc(self) -> None:
+        records = [
+            (3, "C", "C", 21, "M"),
+            (1, "A", "A", 20, "F"),
+            (2, "B", "B", 22, "M"),
+        ]
+        for record in records:
+            self.student_table.create_record(*record)
+
+        sorted_records = self.student_table.sort_records("id")
+        self.assertEqual(sorted_records, [records[1], records[2], records[0]])
+
+    def test_sort_records_by_first_name_desc(self) -> None:
+        records = [
+            (1, "Charlie", "A", 20, "M"),
+            (2, "Alice", "B", 21, "F"),
+            (3, "Bob", "C", 22, "M"),
+        ]
+        for record in records:
+            self.student_table.create_record(*record)
+
+        sorted_records = self.student_table.sort_records("first_name", descending=True)
+        self.assertEqual(sorted_records, [records[0], records[2], records[1]])
+
+    def test_sort_records_by_age_asc(self) -> None:
+        records = [
+            (1, "A", "A", 25, "M"),
+            (2, "B", "B", 18, "F"),
+            (3, "C", "C", 21, "M"),
+        ]
+        for record in records:
+            self.student_table.create_record(*record)
+
+        sorted_records = self.student_table.sort_records("age")
+        self.assertEqual(sorted_records, [records[1], records[2], records[0]])
+
+    def test_sort_records_invalid_field(self) -> None:
+        with self.assertRaises(InvalidFieldError) as ctx:
+            self.student_table.sort_records("unknown")
+        self.assertEqual(str(ctx.exception), "Неизвестное поле: unknown")
+
+    def test_sort_records_does_not_mutate_table(self) -> None:
+        self.student_table.create_record(2, "B", "B", 20, "M")
+        self.student_table.create_record(1, "A", "A", 21, "F")
+
+        self.student_table.sort_records("id")
+        self.assertEqual(
+            self.student_table.select_record(),
+            [(2, "B", "B", 20, "M"), (1, "A", "A", 21, "F")],
+        )

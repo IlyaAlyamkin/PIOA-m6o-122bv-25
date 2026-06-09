@@ -1,6 +1,19 @@
-from .errors import DuplicateIDError, InvalidAgeError, RecordNotFoundError
+from .errors import (
+    DuplicateIDError,
+    InvalidAgeError,
+    InvalidFieldError,
+    RecordNotFoundError,
+)
 
 type StudentRecord = tuple[int, str, str, int, str]
+
+_FIELD_INDEX: dict[str, int] = {
+    "id": 0,
+    "first_name": 1,
+    "second_name": 2,
+    "age": 3,
+    "sex": 4,
+}
 
 
 class StudentTable:
@@ -108,3 +121,14 @@ class StudentTable:
                 return self._student.pop(i)
 
         raise RecordNotFoundError("Запись с таким id не найдена.")
+
+    def sort_records(self, field: str, *, descending: bool = False) -> list[StudentRecord]:
+        if field not in _FIELD_INDEX:
+            raise InvalidFieldError(f"Неизвестное поле: {field}")
+
+        index = _FIELD_INDEX[field]
+        return sorted(
+            self._student,
+            key=lambda record: record[index],
+            reverse=descending,
+        )

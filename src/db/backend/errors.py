@@ -20,3 +20,9 @@ class RecordNotFoundError(StudentTableError):
     """Ошибка, возникающая при обращении к несуществующей записи по id."""
 
     pass
+
+
+class InvalidFieldError(StudentTableError):
+    """Ошибка, возникающая при указании неизвестного поля для сортировки."""
+
+    pass
